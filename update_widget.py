@@ -113,7 +113,7 @@ def main() -> None:
         paper_bgcolor="LightSteelBlue",
     )
     fig.update_layout(layout)
-    fig.write_html("html/index.html")
+    fig.write_html("docs/index.html")
 
 
 if __name__ == "__main__":
