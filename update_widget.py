@@ -4,6 +4,7 @@ from datetime import date, datetime
 
 import pandas as pd
 from arcgis.gis import GIS
+from matplotlib.pyplot import axis
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 from plotly_calplot.layout_formatter import showscale_of_heatmaps
@@ -11,8 +12,10 @@ from plotly_calplot.single_year_calplot import year_calplot
 from plotly_calplot.utils import fill_empty_with_zeros
 
 
-def add_curr_day_square(cplt: go.Figure, pad: bool = True) -> go.Figure:
-    kwargs = dict(type="rect", line=dict(color="black", width=3))
+def add_curr_day_square(cplt: go.Figure, pad: bool = True, it: int = 1) -> go.Figure:
+    kwargs = dict(
+        type="rect", line=dict(color="black", width=3), xref=f"x{it}", yref=f"y{it}"
+    )
     weeknum = int(date.today().strftime("%W"))
     weekday = date.today().weekday()
 
@@ -85,25 +88,21 @@ def main() -> None:
             year=format_plot_name(sistema),
         )
 
-    plt = add_curr_day_square(plt, pad=True)
-
     xaxis_text = dict(ticktext=localized_month_names())
     yaxis_text = dict(ticktext=localized_day_names(4))
+    axis_texts = dict()
+    for i in range(1, len(sistemos) + 1):
+        plt = add_curr_day_square(plt, pad=True, it=i)
+        axis_texts.update({f"xaxis{i}": xaxis_text, f"yaxis{i}": yaxis_text})
 
-    plt.update_layout(
-        title="nEsveikata - Sistemų gedimai",
-        xaxis=xaxis_text,
-        yaxis=yaxis_text,
-        **{f"xaxis{i}": xaxis_text for i in range(1, len(sistemos) + 1)},
-        **{f"yaxis{i}": yaxis_text for i in range(1, len(sistemos) + 1)},
-    )
+    plt.update_layout(title="nEsveikata - Sistemų gedimai", **axis_texts)
 
     showscale_of_heatmaps(fig)
 
     layout = dict(
         height=270 * len(sistemos),
         width=1350,
-        yaxis_scaleanchor="x",
+        # yaxis_scaleanchor="x",
         margin=dict(
             b=50,
             t=50,
